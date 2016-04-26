@@ -109,7 +109,7 @@ func (self Path) Ext() string {
 }
 
 func (self Path) Drive() Path {
-	return filepath.VolumeName(string(self))
+	return Path(filepath.VolumeName(string(self)))
 }
 
 func (self Path) Parent() Path {
@@ -118,6 +118,16 @@ func (self Path) Parent() Path {
 
 func (self Path) Name() Path {
 	return self.BaseName()
+}
+
+func (self Path) SplitPath() (Path, string) {
+	dir, file := filepath.Split(string(self))
+	return Path(filepath.Dir(dir)), file
+}
+
+func (self Path) SplitDrive() (Path, string) {
+	drive := self.Drive()
+	return drive, string(self)[len(string(drive)):]
 }
 
 func main() {
@@ -136,8 +146,19 @@ func main() {
 	fmt.Printf("%s\n", Path("/toto/titi.go").DirName())
 	fmt.Printf("%s\n", Path("/toto/titi.go").BaseName())
 	fmt.Printf("%s\n", Path("~/toto/titi.go").Expand())
+
 	v, ext := Path("~/toto/titi.go").SplitExt()
 	fmt.Printf("base: %s, ext: %s\n", v, ext)
 
 	fmt.Printf("%s\n", Path("~/toto/titi.go").NameBase())
+	fmt.Printf("%s\n", Path("~/toto/titi.go").Ext())
+	fmt.Printf("%s\n", Path("C:\\toto\\titi").Drive())
+
+	fmt.Printf("%s\n", Path("~/toto/titi.go").Parent())
+	fmt.Printf("%s\n", Path("~/toto/titi.go").Name())
+	v, f := Path("~/toto/titi.go").SplitPath()
+	fmt.Printf("dir: %s, file: %s\n", v, f)
+
+	v, f = Path("~/toto/titi.go").SplitDrive()
+	fmt.Printf("drive: %s, file: %s\n", v, f)
 }
