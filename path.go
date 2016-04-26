@@ -173,11 +173,15 @@ func (self Path) SplitAll() (Path, []string) {
 	return Path(parts[0]), parts[1:]
 }
 
-	v, f := Path("~/toto/titi.go").SplitPath()
-	fmt.Printf("dir: %s, file: %s\n", v, f)
+func (self Path) RelPath(start string) (Path, error) {
+	path, err := filepath.Rel(start, string(self))
+	return Path(path), err
+}
 
-	v, f = Path("~/toto/titi.go").SplitDrive()
-	fmt.Printf("drive: %s, file: %s\n", v, f)
+func (self Path) RelPathTo(dest string) (Path, error) {
+	path, err := filepath.Rel(string(self), dest)
+	return Path(path), err
+}
 
 	fmt.Printf("%s\n", Path("~/toto/titi.go").StripExt())
 }
