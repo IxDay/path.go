@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -183,8 +184,74 @@ func (self Path) RelPathTo(dest string) (Path, error) {
 	return Path(path), err
 }
 
+type filterFunc func(file os.FileInfo) bool
+
+func (self Path) FilterDir(filter filterFunc) (paths []Path, err error) {
+	files, err := ioutil.ReadDir(string(self))
+	if err != nil {
+		return nil, err
+	}
+
+	for _, file := range files {
+		if filter == nil || filter(file) {
+			paths = append(paths, Path(file.Name()))
+		}
+	}
+	return
+}
+
+func (self Path) ListDir() ([]Path, error) {
+	return self.FilterDir(nil)
+}
+
+func (self Path) ListDirPattern(pattern string) ([]Path, error) {
+	_, err := filepath.Match(pattern, "")
+	if err != nil {
+		return nil, err
+	}
+	return self.FilterDir(func(file os.FileInfo) bool {
+		matched, _ := filepath.Match(pattern, file.Name())
+		return matched
+	})
+}
+
+func (self Path) Files() ([]Path, error) {
+	return self.FilterDir(func(file os.FileInfo) bool {
+		return !file.IsDir()
+	})
+}
+
+func (self Path) FilesPattern(pattern string) ([]Path, error) {
+	_, err := filepath.Match(pattern, "")
+	if err != nil {
+		return nil, err
+	}
+	return self.FilterDir(func(file os.FileInfo) bool {
+		matched, _ := filepath.Match(pattern, file.Name())
+		return matched && !file.IsDir()
+	})
+}
+
+func (self Path) Dirs() ([]Path, error) {
+	return self.FilterDir(func(file os.FileInfo) bool {
+		return file.IsDir()
+	})
+}
+
+func (self Path) DirsPattern(pattern string) ([]Path, error) {
+	_, err := filepath.Match(pattern, "")
+	if err != nil {
+		return nil, err
+	}
+	return self.FilterDir(func(file os.FileInfo) bool {
+		matched, _ := filepath.Match(pattern, file.Name())
+		return matched && file.IsDir()
+	})
+}
+
 func main() {
-	curDir, err := os.Getwd()
+	_cwd, err := os.Getwd()
+	cwd := Path(_cwd)
 	if err != nil {
 		fmt.Printf("An error occured: %s", err)
 		return
@@ -230,7 +297,20 @@ func main() {
 	//	fmt.Printf("cur: %s, rest: %v", f, v)
 	//f, _ := Path(curDir).RelPath("/tmp")
 	//fmt.Printf("%s\n", f)
+	//
+	//	f, _ := Path(curDir).RelPathTo("/tmp")
+	//	fmt.Printf("%s\n", f)
 
-	f, _ := Path(curDir).RelPathTo("/tmp")
-	fmt.Printf("%s\n", f)
+	//files, _ := cwd.ListDir()
+	//fmt.Printf("%v\n", files)
+
+	//files, _ := cwd.ListDirPattern("*.go")
+	//fmt.Printf("%v\n", files)
+
+	//files, _ := cwd.Files()
+	//fmt.Printf("%v\n", files)
+
+	files, _ := cwd.FilesPattern("*.go")
+	fmt.Printf("%v\n", files)
+
 }
