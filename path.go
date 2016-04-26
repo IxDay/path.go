@@ -92,13 +92,6 @@ func (self Path) Expand() Path {
 	return self.ExpandVars().ExpandUser().NormPath()
 }
 
-func (self Path) SplitExt() (Path, string) {
-	filePath := string(self)
-	ext := filepath.Ext(filePath)
-	length := len(filePath) - len(ext)
-	return Path(filePath[:length]), ext
-}
-
 func (self Path) NameBase() string {
 	base, _ := self.BaseName().SplitExt()
 	return string(base)
@@ -128,6 +121,13 @@ func (self Path) SplitPath() (Path, string) {
 func (self Path) SplitDrive() (Path, string) {
 	drive := self.Drive()
 	return drive, string(self)[len(string(drive)):]
+}
+
+func (self Path) SplitExt() (Path, string) {
+	filePath := string(self)
+	ext := filepath.Ext(filePath)
+	length := len(filePath) - len(ext)
+	return Path(filePath[:length]), ext
 }
 
 func main() {
