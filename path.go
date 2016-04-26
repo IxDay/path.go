@@ -130,6 +130,11 @@ func (self Path) SplitExt() (Path, string) {
 	return Path(filePath[:length]), ext
 }
 
+func (self Path) StripExt() Path {
+	f, _ := self.SplitExt()
+	return f
+}
+
 func main() {
 	v, _ := Path(".").Abs()
 	fmt.Printf("%s\n", v)
@@ -156,9 +161,12 @@ func main() {
 
 	fmt.Printf("%s\n", Path("~/toto/titi.go").Parent())
 	fmt.Printf("%s\n", Path("~/toto/titi.go").Name())
+
 	v, f := Path("~/toto/titi.go").SplitPath()
 	fmt.Printf("dir: %s, file: %s\n", v, f)
 
 	v, f = Path("~/toto/titi.go").SplitDrive()
 	fmt.Printf("drive: %s, file: %s\n", v, f)
+
+	fmt.Printf("%s\n", Path("~/toto/titi.go").StripExt())
 }
