@@ -112,6 +112,10 @@ func (self Path) Drive() Path {
 	return filepath.VolumeName(string(self))
 }
 
+func (self Path) Parent() Path {
+	return self.DirName()
+}
+
 func main() {
 	v, _ := Path(".").Abs()
 	fmt.Printf("%s\n", v)
