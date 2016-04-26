@@ -1,7 +1,6 @@
-package main
+package path
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"os/user"
@@ -247,70 +246,4 @@ func (self Path) DirsPattern(pattern string) ([]Path, error) {
 		matched, _ := filepath.Match(pattern, file.Name())
 		return matched && file.IsDir()
 	})
-}
-
-func main() {
-	_cwd, err := os.Getwd()
-	cwd := Path(_cwd)
-	if err != nil {
-		fmt.Printf("An error occured: %s", err)
-		return
-	}
-	//v, _ := Path(".").Abs()
-	//fmt.Printf("%s\n", v)
-	//
-	//fmt.Printf("%s\n", Path("./Toto").NormCase())
-	//fmt.Printf("%s\n", Path("..//streams/.").NormPath())
-	//
-	//v, _ = Path("./toto").RealPath()
-	//fmt.Printf("%s\n", v)
-	//
-	//fmt.Printf("%s\n", Path("~/toto").ExpandUser())
-	//
-	//// ExpandVars
-	//fmt.Printf("%s\n", Path("/toto/titi.go").DirName())
-	//fmt.Printf("%s\n", Path("/toto/titi.go").BaseName())
-	//fmt.Printf("%s\n", Path("~/toto/titi.go").Expand())
-	//
-	//v, ext := Path("~/toto/titi.go").SplitExt()
-	//fmt.Printf("base: %s, ext: %s\n", v, ext)
-	//
-	//fmt.Printf("%s\n", Path("~/toto/titi.go").NameBase())
-	//fmt.Printf("%s\n", Path("~/toto/titi.go").Ext())
-	//fmt.Printf("%s\n", Path("C:\\toto\\titi").Drive())
-	//
-	//fmt.Printf("%s\n", Path("~/toto/titi.go").Parent())
-	//fmt.Printf("%s\n", Path("~/toto/titi.go").Name())
-	//
-	//v, f := Path("~/toto/titi.go").SplitPath()
-	//fmt.Printf("dir: %s, file: %s\n", v, f)
-	//
-	//v, f = Path("~/toto/titi.go").SplitDrive()
-	//fmt.Printf("drive: %s, file: %s\n", v, f)
-	//
-	//fmt.Printf("%s\n", Path("~/toto/titi.go").StripExt())
-	//
-	//fmt.Printf("%s\n", Path("~/toto").Join("titi", "tutu"))
-	//fmt.Printf("%s\n", Path("~/toto").JoinPath(Path("titi"), Path("tutu")))
-	//
-	//	f, v := Path(curDir).Join("toto", "titi").SplitAll()
-	//	fmt.Printf("cur: %s, rest: %v", f, v)
-	//f, _ := Path(curDir).RelPath("/tmp")
-	//fmt.Printf("%s\n", f)
-	//
-	//	f, _ := Path(curDir).RelPathTo("/tmp")
-	//	fmt.Printf("%s\n", f)
-
-	//files, _ := cwd.ListDir()
-	//fmt.Printf("%v\n", files)
-
-	//files, _ := cwd.ListDirPattern("*.go")
-	//fmt.Printf("%v\n", files)
-
-	//files, _ := cwd.Files()
-	//fmt.Printf("%v\n", files)
-
-	files, _ := cwd.FilesPattern("*.go")
-	fmt.Printf("%v\n", files)
-
 }
