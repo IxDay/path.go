@@ -84,6 +84,34 @@ func (self Path) DirName() Path {
 	return Path(filepath.Dir(string(self)))
 }
 
+func (self Path) BaseName() Path {
+	return Path(filepath.Base(string(self)))
+}
+
+func (self Path) Expand() Path {
+	return self.ExpandVars().ExpandUser().NormPath()
+}
+
+func (self Path) SplitExt() (Path, string) {
+	filePath := string(self)
+	ext := filepath.Ext(filePath)
+	length := len(filePath) - len(ext)
+	return Path(filePath[:length]), ext
+}
+
+func (self Path) NameBase() string {
+	base, _ := self.BaseName().SplitExt()
+	return string(base)
+}
+
+func (self Path) Ext() string {
+	return filepath.Ext(string(self))
+}
+
+func (self Path) Drive() Path {
+	return filepath.VolumeName(string(self))
+}
+
 func main() {
 	v, _ := Path(".").Abs()
 	fmt.Printf("%s\n", v)
@@ -98,4 +126,10 @@ func main() {
 
 	// ExpandVars
 	fmt.Printf("%s\n", Path("/toto/titi.go").DirName())
+	fmt.Printf("%s\n", Path("/toto/titi.go").BaseName())
+	fmt.Printf("%s\n", Path("~/toto/titi.go").Expand())
+	v, ext := Path("~/toto/titi.go").SplitExt()
+	fmt.Printf("base: %s, ext: %s\n", v, ext)
+
+	fmt.Printf("%s\n", Path("~/toto/titi.go").NameBase())
 }
