@@ -148,20 +148,30 @@ func (self Path) JoinPath(paths ...Path) Path {
 	return self.Join(stringPaths...)
 }
 
-	// ExpandVars
-	fmt.Printf("%s\n", Path("/toto/titi.go").DirName())
-	fmt.Printf("%s\n", Path("/toto/titi.go").BaseName())
-	fmt.Printf("%s\n", Path("~/toto/titi.go").Expand())
+func splitAll(path string) []string {
+	dir, file := filepath.Split(path)
+	if file == "" {
+		return []string{dir}
+	}
+	return append(splitAll(filepath.Dir(dir)), file)
+}
 
-	v, ext := Path("~/toto/titi.go").SplitExt()
-	fmt.Printf("base: %s, ext: %s\n", v, ext)
+func (self Path) SplitAll() (Path, []string) {
+	parts := splitAll(string(self))
+	curDir, err := os.Getwd()
 
-	fmt.Printf("%s\n", Path("~/toto/titi.go").NameBase())
-	fmt.Printf("%s\n", Path("~/toto/titi.go").Ext())
-	fmt.Printf("%s\n", Path("C:\\toto\\titi").Drive())
+	if err == nil {
+		loc := parts[0]
+		for i, part := range parts {
+			if loc == curDir {
+				return Path(loc), parts[i:]
+			}
+			loc = filepath.Join(loc, part)
+		}
+	}
 
-	fmt.Printf("%s\n", Path("~/toto/titi.go").Parent())
-	fmt.Printf("%s\n", Path("~/toto/titi.go").Name())
+	return Path(parts[0]), parts[1:]
+}
 
 	v, f := Path("~/toto/titi.go").SplitPath()
 	fmt.Printf("dir: %s, file: %s\n", v, f)
