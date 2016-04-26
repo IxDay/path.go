@@ -135,17 +135,18 @@ func (self Path) StripExt() Path {
 	return f
 }
 
-func main() {
-	v, _ := Path(".").Abs()
-	fmt.Printf("%s\n", v)
+func (self Path) Join(paths ...string) Path {
+	paths = append([]string{string(self)}, paths...)
+	return Path(filepath.Join(paths...))
+}
 
-	fmt.Printf("%s\n", Path("./Toto").NormCase())
-	fmt.Printf("%s\n", Path("..//streams/.").NormPath())
-
-	v, _ = Path("./toto").RealPath()
-	fmt.Printf("%s\n", v)
-
-	fmt.Printf("%s\n", Path("~/toto").ExpandUser())
+func (self Path) JoinPath(paths ...Path) Path {
+	stringPaths := make([]string, len(paths))
+	for i, path := range paths {
+		stringPaths[i] = string(path)
+	}
+	return self.Join(stringPaths...)
+}
 
 	// ExpandVars
 	fmt.Printf("%s\n", Path("/toto/titi.go").DirName())
