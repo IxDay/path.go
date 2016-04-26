@@ -116,6 +116,10 @@ func (self Path) Parent() Path {
 	return self.DirName()
 }
 
+func (self Path) Name() Path {
+	return self.BaseName()
+}
+
 func main() {
 	v, _ := Path(".").Abs()
 	fmt.Printf("%s\n", v)
