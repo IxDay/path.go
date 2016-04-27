@@ -190,6 +190,46 @@ func (self Path) DirsPattern(pattern string) ([]Path, error) {
 	})
 }
 
+const (
+	Ignore = iota
+	Warn
+	Strict
+)
+
+func (self Path) Walk(errors int) error {
+	warningError := WarningError([]Path{})
+	var cb WalkFunc
+
+	switch errors {
+	case Ignore:
+		cb = func(_ Path, _ error) error { return filepath.SkipDir }
+	case Strict:
+		cb = func(_ Path, err error) error { return err }
+	case Warn:
+		cb = func(path Path, _ error) error {
+			warningError := append(warningError, path)
+			return filepath.SkipDir
+		}
+	}
+	err := self.WalkCb(cb)
+
+	if errors == Warn {
+		return &warningError
+	}
+	return err
+}
+
+type WalkFunc func(path Path, err error) error
+
+func (self Path) WalkCb(walkFn WalkFunc) error {
+	return filepath.Walk(
+		string(self),
+		func(path string, _ os.FileInfo, err error) error {
+			return walkFn(Path(path), err)
+		},
+	)
+}
+
 func (self Path) Stat() (os.FileInfo, error) {
 	return os.Stat(string(self))
 }
