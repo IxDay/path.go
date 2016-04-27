@@ -1,33 +1,80 @@
 package path
 
 import (
-	"fmt"
-	//"os"
+	"os"
+	"reflect"
 	"testing"
 )
 
-//func TestAbs(t *testing.T) {
-//	_cwd, err := os.Getwd()
-//
-//	cwd := Path(_cwd)
-//	if err != nil {
-//		t.Errorf("An error occured: %s", err)
-//		return
-//	}
-//
-//	fmt.Printf("%s\n", cwd)
-//}
+var stattests = []string{
+	".",
+	"/root/foo",
+}
 
-func TestAbs(t *testing.T) {
-	//_cwd, _ := os.Getwd()
+func TestStat(t *testing.T) {
+	for _, tt := range stattests {
 
-	//cwd := Path(_cwd)
-	//cwd = cwd.Join("/toto")
-	//
-	//err := cwd.RemoveTree()
-	//fmt.Printf("%v\n", err)
+		osStatFileInfo, osStatError := os.Stat(tt)
+		pathStatFileInfo, pathStatError := Path(tt).Stat()
+
+		isValid := reflect.DeepEqual(osStatFileInfo, pathStatFileInfo)
+		isValid = isValid && reflect.DeepEqual(osStatError, pathStatError)
+
+		if !isValid {
+			t.Errorf(
+				"Path(%q).Stat() => \n%q %q, \nwant:\n%q %q", tt,
+				pathStatFileInfo, pathStatError,
+				osStatFileInfo, osStatError,
+			)
+		}
+	}
+}
+
+func TestTempDir(t *testing.T) {
+	called := false
 
 	TempDir(func(p Path) {
-		fmt.Printf("%s\n", p)
+		if _, err := p.Stat(); IsNotExist(err) {
+			t.Errorf("TempDir() => %q, does not exist", p)
+		}
+		called = true
+	})
+	if !called {
+		t.Errorf("TempDir() => cb, not called")
+	}
+}
+
+func TestGetwd(t *testing.T) {
+	osGetwdDir, osGetwdErr := os.Getwd()
+	pathGetwdDir, pathGetwdErr := Getwd()
+
+	isValid := osGetwdDir == string(pathGetwdDir)
+	isValid = isValid && reflect.DeepEqual(osGetwdErr, pathGetwdErr)
+
+	if !isValid {
+		t.Errorf(
+			"Getwd() => \n%q %q \nwant: \n%q %q",
+			pathGetwdDir, pathGetwdErr, osGetwdDir, osGetwdErr,
+		)
+	}
+}
+
+func TestCd(t *testing.T) {
+	TempDir(func(p Path) {
+		p.Cd()
+		cwd, _ := Getwd()
+		if p != cwd {
+			t.Errorf("Path(%q).Cd(), do not move to correct directory", p)
+		}
+	})
+}
+
+func TestAbs(t *testing.T) {
+	TempDir(func(p Path) {
+		p.Cd()
+		abs, _ := Path(".").Abs()
+		if p != abs {
+			t.Errorf("Path(.).Abs() => %q, want: %q", abs, p)
+		}
 	})
 }

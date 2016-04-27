@@ -11,8 +11,12 @@ import (
 	"syscall"
 )
 
+var (
+	IsNotExist    = os.IsNotExist
+	NotAFileError = errors.New("not a file")
+)
+
 var POSIX = runtime.GOOS != "windows"
-var NotAFileError = errors.New("not a file")
 
 type Path string
 
@@ -315,4 +319,17 @@ func TempDirNamed(dir, prefix string, cb func(Path)) error {
 	defer p.RemoveTreeP()
 	cb(p)
 	return nil
+}
+
+func Getwd() (Path, error) {
+	p, err := os.Getwd()
+	return Path(p), err
+}
+
+func (self Path) Chdir() error {
+	return os.Chdir(string(self))
+}
+
+func (self Path) Cd() error {
+	return self.Chdir()
 }
