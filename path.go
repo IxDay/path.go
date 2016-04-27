@@ -207,7 +207,7 @@ func (self Path) Walk(errors int) error {
 		cb = func(_ Path, err error) error { return err }
 	case Warn:
 		cb = func(path Path, _ error) error {
-			warningError := append(warningError, path)
+			warningError = append(warningError, path)
 			return filepath.SkipDir
 		}
 	}
