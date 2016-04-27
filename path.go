@@ -1,19 +1,12 @@
 package path
 
 import (
-	"errors"
 	"io/ioutil"
 	"os"
 	"os/user"
 	"path/filepath"
 	"runtime"
 	"strings"
-	"syscall"
-)
-
-var (
-	IsNotExist    = os.IsNotExist
-	NotAFileError = errors.New("not a file")
 )
 
 var POSIX = runtime.GOOS != "windows"
@@ -74,7 +67,10 @@ func expandNtUser(path string) string {
 func (self Path) ExpandUser() Path {
 	path := string(self)
 	if path[0] != '~' {
-	} else if POSIX {
+		return Path(path)
+	}
+
+	if POSIX {
 		path = expandPosixUser(path)
 	} else {
 		path = expandNtUser(path)
@@ -269,56 +265,6 @@ func (self Path) isDir() (bool, error) {
 		return false, err
 	}
 	return fileInfo.IsDir(), nil
-}
-
-func (self Path) Remove() error {
-	b, err := self.isDir()
-	if err != nil {
-		return err
-	}
-	if b {
-		return &os.PathError{"remove", string(self), NotAFileError}
-	}
-	return os.Remove(string(self))
-}
-
-func (self Path) RemoveP() error {
-	err, ok := self.Remove().(*os.PathError)
-
-	if err == nil || ok && err.Err == syscall.ENOENT {
-		return nil
-	}
-	return err
-}
-
-func (self Path) RemoveTree() error {
-	_, err := self.Stat()
-	if err != nil {
-		if e, ok := err.(*os.PathError); ok && e.Err == syscall.ENOENT {
-			e.Op = "remove"
-			return e
-		}
-	}
-	return os.RemoveAll(string(self))
-}
-
-func (self Path) RemoveTreeP() error {
-	return os.RemoveAll(string(self))
-}
-
-func TempDir(cb func(Path)) error {
-	return TempDirNamed("", "", cb)
-}
-
-func TempDirNamed(dir, prefix string, cb func(Path)) error {
-	name, err := ioutil.TempDir(dir, prefix)
-	if err != nil {
-		return err
-	}
-	p := Path(name)
-	defer p.RemoveTreeP()
-	cb(p)
-	return nil
 }
 
 func Getwd() (Path, error) {
