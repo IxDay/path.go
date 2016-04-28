@@ -30,20 +30,6 @@ func TestStat(t *testing.T) {
 	}
 }
 
-func TestTempDir(t *testing.T) {
-	called := false
-
-	TempDir(func(p Path) {
-		if _, err := p.Stat(); IsNotExist(err) {
-			t.Errorf("TempDir() => %q, does not exist", p)
-		}
-		called = true
-	})
-	if !called {
-		t.Errorf("TempDir() => cb, not called")
-	}
-}
-
 func TestGetwd(t *testing.T) {
 	osGetwdDir, osGetwdErr := os.Getwd()
 	pathGetwdDir, pathGetwdErr := Getwd()
