@@ -5,6 +5,33 @@ import (
 	"testing"
 )
 
+func TestTempFile(t *testing.T) {
+	// test normal behaviour
+	TempDir(func(p Path) {
+		if _, err := p.TempFile(); err != nil {
+			t.Errorf("TempFile(foo) => f, %q, must not return an error", err)
+		}
+	})
+
+	// test access error
+	if _, err := Path("/root").TempFile(); !os.IsPermission(err) {
+		t.Errorf(
+			"Path('/root').TempFile() must return permission error, got %q", err,
+		)
+	}
+}
+
+func TestTempFileP(t *testing.T) {
+	// test prefixed tempfile
+	TempDir(func(p Path) {
+		if f, _ := p.TempFileP("foo"); string(f.Path.BaseName())[:3] != "foo" {
+			t.Errorf(
+				"TempFile(foo) => %q, must return a file prefixed with 'foo'", f.Path,
+			)
+		}
+	})
+}
+
 func TestTempDir(t *testing.T) {
 	called := false
 
