@@ -18,7 +18,7 @@ func (self Path) Remove() error {
 func (self Path) RemoveP() error {
 	err, ok := self.Remove().(*os.PathError)
 
-	if err == nil || ok && err.Err == ENOENT {
+	if err == nil || ok && os.IsNotExist(err.Err) {
 		return nil
 	}
 	return err
@@ -27,7 +27,7 @@ func (self Path) RemoveP() error {
 func (self Path) RemoveTree() error {
 	_, err := self.Stat()
 	if err != nil {
-		if e, ok := err.(*os.PathError); ok && e.Err == ENOENT {
+		if e, ok := err.(*os.PathError); ok && os.IsNotExist(e.Err) {
 			e.Op = "remove"
 			return e
 		}

@@ -2,7 +2,6 @@ package path
 
 import (
 	"os"
-	"syscall"
 	"testing"
 )
 
@@ -10,7 +9,7 @@ func TestTempDir(t *testing.T) {
 	called := false
 
 	TempDir(func(p Path) {
-		if _, err := p.Stat(); IsNotExist(err) {
+		if _, err := p.Stat(); os.IsNotExist(err) {
 			t.Errorf("TempDir() => %q, does not exist", p)
 		}
 		called = true
@@ -37,7 +36,7 @@ func TestTempDirNamed(t *testing.T) {
 
 func TestTempDirNamedPermError(t *testing.T) {
 	err := TempDirNamed("/root", "", func(_ Path) {}).(*os.PathError)
-	if err.Err != syscall.EACCES {
-		t.Errorf("TempDir() => %q, want: %q", err.Err, syscall.EACCES)
+	if err == nil || !os.IsPermission(err.Err) {
+		t.Errorf("TempDir() => %q, must return no access error", err)
 	}
 }
