@@ -20,7 +20,7 @@ func TestTempFile_(t *testing.T) {
 	// test normal behaviour
 	TmpDir_(func(p Path) {
 		if _, err := p.TempFile_(); err != nil {
-			t.Errorf("TempFile(foo) => f, %q, must not return an error", err)
+			t.Errorf("Path().TempFile() => p, %q, must not return an error", err)
 		}
 	})
 
@@ -30,7 +30,15 @@ func TestTempFile_(t *testing.T) {
 			"Path('/root').TempFile() must return permission error, got %q", err,
 		)
 	}
+
+	// test TempFile alias
+	if p, err := TempFile_(); err != nil {
+		t.Errorf("TempFile_() => p, %q, must not return an error", err)
+	} else {
+		p.Remove()
+	}
 }
+
 func TestPathTempFile(t *testing.T) {
 	// test prefixed tempfile
 	TmpDir_(func(p Path) {
@@ -58,6 +66,26 @@ func TestPathTempFile_(t *testing.T) {
 	}
 }
 
+func TestPathTmpDir(t *testing.T) {
+	called := false
+
+	TmpDir_(func(p Path) {
+		// test prefix
+		p.TmpDir("foo", func(p Path) {
+			p = p.BaseName()
+			if string(p)[:3] != "foo" {
+				t.Errorf("must return a dir prefixed with 'foo', got %q", p)
+			}
+		})
+
+		// test no prefix
+		p.TmpDir_(func(_ Path) { called = true })
+	})
+	if !called {
+		t.Errorf("cb, not called")
+	}
+}
+
 func TestTmpDir(t *testing.T) {
 	// test normal behavior
 	dir, prefix := "/tmp", "prefix"
@@ -74,9 +102,9 @@ func TestTmpDir(t *testing.T) {
 	})
 
 	// test permission denied
-	err := TmpDir("/root", "", func(_ Path) {}).(*os.PathError)
-	if err == nil || !os.IsPermission(err.Err) {
-		t.Errorf("TempDir() => %q, must return no access error", err)
+	err := TmpDir("/root", "", func(_ Path) {})
+	if err == nil || !os.IsPermission(err) {
+		t.Errorf("TmpDir() => %q, must return no access error", err)
 	}
 }
 
@@ -85,11 +113,19 @@ func TestTmpDir_(t *testing.T) {
 
 	TmpDir_(func(p Path) {
 		if _, err := p.Stat(); os.IsNotExist(err) {
-			t.Errorf("TempDir() => %q, does not exist", p)
+			t.Errorf("TmpDir_() => %q, does not exist", p)
 		}
 		called = true
 	})
 	if !called {
-		t.Errorf("TempDir() => cb, not called")
+		t.Errorf("TmpDir_() => cb, not called")
+	}
+}
+
+func TestTempDir_(t *testing.T) {
+	if p, err := TempDir_(); err != nil {
+		t.Errorf("TempDir_() => %q, must not return an error", err)
+	} else {
+		p.RemoveTree()
 	}
 }
