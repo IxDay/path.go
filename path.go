@@ -1,3 +1,5 @@
+// Package path provides a high level Path structure which help the user
+// to deal with the filesystem.
 package path
 
 import (
@@ -239,11 +241,11 @@ func (self Path) LStat() (os.FileInfo, error) {
 }
 
 func (self Path) isDir() (bool, error) {
-	fileInfo, err := self.Stat()
-	if err != nil {
+	if fileInfo, err := self.Stat(); err != nil {
 		return false, err
+	} else {
+		return fileInfo.IsDir(), nil
 	}
-	return fileInfo.IsDir(), nil
 }
 
 func Getwd() (Path, error) {

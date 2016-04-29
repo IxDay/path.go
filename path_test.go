@@ -46,18 +46,15 @@ func TestGetwd(t *testing.T) {
 }
 
 func TestCd(t *testing.T) {
-	TempDir(func(p Path) {
-		p.Cd()
-		cwd, _ := Getwd()
-		if p != cwd {
+	TmpDir_(func(p Path) {
+		if cwd, _ := Getwd(); p != cwd {
 			t.Errorf("Path(%q).Cd(), do not move to correct directory", p)
 		}
 	})
 }
 
 func TestAbs(t *testing.T) {
-	TempDir(func(p Path) {
-		p.Cd()
+	TmpDir_(func(p Path) {
 		abs, _ := Path(".").Abs()
 		if p != abs {
 			t.Errorf("Path(.).Abs() => %q, want: %q", abs, p)
